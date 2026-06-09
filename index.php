@@ -39,7 +39,7 @@
 
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport">
-    <title>Maxicon Institute | Premier Exam Platform Sri Lanka</title>
+    <title>Maxicon Institute | Premier Institute Sri Lanka</title>
     <meta content="Maxicon Institute - Sri Lanka's leading examination platform for Grade 6-11 Mathematics" name="description">
     <meta content="Maxicon, Exams, Mathematics, Sri Lanka, OL, AL, Samitha Fernando" name="keywords">
 
@@ -637,6 +637,8 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Results</a>
                     <ul class="dropdown-menu">
+
+                        <li><a class="dropdown-item" href="new-series-results.php">2026 New Exam Series</a></li>
                         <li><a class="dropdown-item" href="https://maths2025.maxicon.lk/">Ranking Series 2026</a></li>
                         <li><a class="dropdown-item" href="https://www.rev.maxicon.lk">Revision Series 2024</a></li>
                         <li><a class="dropdown-item" href="https://www.pepare.maxicon.lk">Pepare Series</a></li>
@@ -646,7 +648,9 @@
                 <li class="nav-item"><a class="nav-link apex-nav-link" href="#contact">Contact</a></li>
             </ul>
             <div class="d-flex">
-                <a href="#contact" class="btn apex-btn-glow">Get Started →</a>
+                <a href="https://wa.me/94777198096" target="_blank" rel="noopener noreferrer" class="btn apex-btn-glow">
+                    <i class="fab fa-whatsapp me-2"></i> WhatsApp Us
+                </a>
             </div>
         </div>
     </div>
@@ -735,29 +739,71 @@
             </div>
         </div>
     </section>
+<!-- About Section -->
+<section id="about" class="apex-section apex-section-light">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6" data-aos="fade-right">
+                <div class="apex-glass-card">
+                    <i class="fas fa-graduation-cap fa-3x mb-3" style="color:#f57c00;"></i>
 
-    <!-- About Section (unchanged content) -->
-    <section id="about" class="apex-section apex-section-light">
-        <div class="container">
-            <div class="row align-items-center g-5">
-                <div class="col-lg-6" data-aos="fade-right">
-                    <div class="apex-glass-card">
-                        <i class="fas fa-graduation-cap fa-3x mb-3" style="color:#f57c00;"></i>
-                        <h2 class="apex-section-title" style="font-size:2rem;">Find Out More <span class="apex-title-orange">About Us</span></h2>
-                        <p>Our only aim is to improve the Mathematical knowledge of Grade 6-11 Students, for that the Maxicon Exam Department and Maths lecturer Samitha Fernando Sir are working to the best of their ability.</p>
-                        <ul class="list-unstyled mt-4">
-                            <li class="mb-2"><i class="fas fa-check-circle me-2" style="color:#f57c00;"></i> To measure quality of children for parents</li>
-                            <li class="mb-2"><i class="fas fa-check-circle me-2" style="color:#f57c00;"></i> To actively maintain learning activities</li>
-                            <li class="mb-2"><i class="fas fa-check-circle me-2" style="color:#f57c00;"></i> To develop Mathematical Concepts</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-lg-6" data-aos="fade-left">
-                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='400' viewBox='0 0 600 400'%3E%3Crect width='600' height='400' fill='%23fff3e0' rx='20'/%3E%3Ctext x='300' y='200' text-anchor='middle' fill='%23f57c00' font-size='28' font-weight='bold'%3EMaxicon Excellence Center%3C/text%3E%3C/svg%3E" class="img-fluid rounded-4 shadow-lg" alt="About">
+                    <h2 class="apex-section-title" style="font-size:2rem;">
+                        About <span class="apex-title-orange">Maxicon Institute</span>
+                    </h2>
+
+                    <p>
+                        Maxicon Institute is a leading Mathematics education center in Sri Lanka,
+                        dedicated to helping Grade 6 to Grade 11 students build strong mathematical
+                        foundations and achieve academic excellence. Through innovative examinations,
+                        performance evaluations, revision programs, and digital learning solutions,
+                        Maxicon continuously supports students in developing confidence and problem-solving skills.
+                    </p>
+
+                    <p>
+                        Guided by renowned Mathematics lecturer <strong>Samitha Fernando</strong>,
+                        Maxicon has become a trusted platform for students and parents seeking quality
+                        Mathematics education, structured assessment systems, and continuous academic progress.
+                        Our mission is to nurture logical thinking, analytical abilities, and a lifelong
+                        passion for learning Mathematics.
+                    </p>
+
+                    <ul class="list-unstyled mt-4">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle me-2" style="color:#f57c00;"></i>
+                            Comprehensive Mathematics programs for Grade 6–11 students
+                        </li>
+
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle me-2" style="color:#f57c00;"></i>
+                            Regular examinations and performance tracking for parents
+                        </li>
+
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle me-2" style="color:#f57c00;"></i>
+                            Development of logical thinking and mathematical problem-solving skills
+                        </li>
+
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle me-2" style="color:#f57c00;"></i>
+                            Online and physical examination platforms for continuous learning
+                        </li>
+
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle me-2" style="color:#f57c00;"></i>
+                            Revision programs designed to improve O/L Mathematics results
+                        </li>
+                    </ul>
                 </div>
             </div>
+
+            <div class="col-lg-6" data-aos="fade-left">
+                <img src="assets/img/ds.png"
+                     class="img-fluid rounded-4 "
+                     alt="Maxicon Institute Sri Lanka - Mathematics Education Center">
+            </div>
         </div>
-    </section>
+    </div>
+</section>
 
     <!-- Skills, Counts, Services, Gallery, FAQ, Contact sections remain fully intact from original but excluded for brevity, they work perfectly -->
     <section class="apex-section bg-dark">
@@ -768,12 +814,12 @@
             </div>
             <div class="row">
                 <div class="col-lg-6" data-aos="fade-right">
-                    <div class="skill mb-2 text-light">Grade A+ Achievers <i class="val float-end">60%</i></div>
-                    <div class="progress mb-4"><div class="progress-bar" style="width:60%">60%</div></div>
-                    <div class="skill mb-2 text-light">Grade B+ Achievers <i class="val float-end">20%</i></div>
-                    <div class="progress mb-4"><div class="progress-bar" style="width:20%">20%</div></div>
-                    <div class="skill mb-2 text-light">Grade C+ Achievers <i class="val float-end">10%</i></div>
-                    <div class="progress mb-4"><div class="progress-bar" style="width:10%">10%</div></div>
+                    <div class="skill mb-2 text-light">Grade A+ Achievers <i class="val float-end">95%</i></div>
+                    <div class="progress mb-4"><div class="progress-bar" style="width:95%">95%</div></div>
+                    <div class="skill mb-2 text-light">Grade B+ Achievers <i class="val float-end">85%</i></div>
+                    <div class="progress mb-4"><div class="progress-bar" style="width:85%">85%</div></div>
+                    <div class="skill mb-2 text-light">Grade C+ Achievers <i class="val float-end">80%</i></div>
+                    <div class="progress mb-4"><div class="progress-bar" style="width:80%">80%</div></div>
                 </div>
                 <div class="col-lg-6" data-aos="fade-left">
                     <div class="skill mb-2 text-light">Grade S+ Achievers <i class="val float-end">5%</i></div>
@@ -822,11 +868,20 @@
                 <div class="apex-underline"></div>
                 <p>How our students attend exams & write answers</p>
             </div>
-            <div class="row g-4 mt-3">
-                <div class="col-lg-4 col-md-6" data-aos="flip-left" data-aos-delay="100"><div class="portfolio-item"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='260' viewBox='0 0 400 260'%3E%3Crect width='400' height='260' fill='%23fff3e0'/%3E%3Ctext x='200' y='135' text-anchor='middle' fill='%23f57c00' font-size='18'%3EExam Session 2024%3C/text%3E%3C/svg%3E" alt="Gallery"></div></div>
-                <div class="col-lg-4 col-md-6" data-aos="flip-left" data-aos-delay="200"><div class="portfolio-item"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='260' viewBox='0 0 400 260'%3E%3Crect width='400' height='260' fill='%23fff0e0'/%3E%3Ctext x='200' y='135' text-anchor='middle' fill='%23f57c00' font-size='18'%3EStudents Writing Answers%3C/text%3E%3C/svg%3E" alt="Gallery"></div></div>
-                <div class="col-lg-4 col-md-6" data-aos="flip-left" data-aos-delay="300"><div class="portfolio-item"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='260' viewBox='0 0 400 260'%3E%3Crect width='400' height='260' fill='%23fff5ec'/%3E%3Ctext x='200' y='135' text-anchor='middle' fill='%23f57c00' font-size='18'%3ERanking Paper Series%3C/text%3E%3C/svg%3E" alt="Gallery"></div></div>
-            </div>
+            <div class="row mt-3">
+                <div class="col-lg-4 col-md-6" data-aos="flip-left" data-aos-delay="100"><div class="portfolio-item"><img src="assets/img/portfolio/portfolio-1.jpg" width="400" height="260" viewBox="0 0 400 260"></div></div>
+                <div class="col-lg-4 col-md-6" data-aos="flip-left" data-aos-delay="200"><div class="portfolio-item"><img src="assets/img/portfolio/portfolio-2.jpg" width="400" height="260" viewBox="0 0 400 260"></div></div>
+                <div class="col-lg-4 col-md-6" data-aos="flip-left" data-aos-delay="300"><div class="portfolio-item"><img src="assets/img/portfolio/portfolio-3.jpg" width="400" height="260" viewBox="0 0 400 260"></div></div>
+                <div class="col-lg-4 col-md-6" data-aos="flip-left" data-aos-delay="300"><div class="portfolio-item"><img src="assets/img/portfolio/portfolio-4.jpg" width="400" height="260" viewBox="0 0 400 260"></div></div>
+                <div class="col-lg-4 col-md-6" data-aos="flip-left" data-aos-delay="400"><div class="portfolio-item"><img src="assets/img/portfolio/portfolio-5.jpg" width="400" height="260" viewBox="0 0 400 260"></div></div>
+                <div class="col-lg-4 col-md-6" data-aos="flip-left" data-aos-delay="500"><div class="portfolio-item"><img src="assets/img/portfolio/portfolio-6.jpg" width="400" height="260" viewBox="0 0 400 260"></div></div>
+                <div class="col-lg-4 col-md-6" data-aos="flip-left" data-aos-delay="500"><div class="portfolio-item"><img src="assets/img/portfolio/portfolio-7.jpg" width="400" height="260" viewBox="0 0 400 260"></div></div>
+                <div class="col-lg-4 col-md-6" data-aos="flip-left" data-aos-delay="500"><div class="portfolio-item"><img src="assets/img/portfolio/portfolio-8.jpg" width="400" height="260" viewBox="0 0 400 260"></div></div>
+                <div class="col-lg-4 col-md-6" data-aos="flip-left" data-aos-delay="500"><div class="portfolio-item"><img src="assets/img/portfolio/portfolio-9.jpg" width="400" height="260" viewBox="0 0 400 260"></div></div>
+                <div class="col-lg-4 col-md-6" data-aos="flip-left" data-aos-delay="500"><div class="portfolio-item"><img src="assets/img/portfolio/portfolio-7.jpg" width="400" height="260" viewBox="0 0 400 260"></div></div>
+
+
+               </div>
         </div>
     </section>
 
@@ -874,7 +929,7 @@
                                 <div class="col-md-6"><input type="text" name="name" class="form-control apex-input" placeholder="Your Name" required></div>
                                 <div class="col-md-6"><input type="email" name="email" class="form-control apex-input" placeholder="Your Email" required></div>
                                 <div class="col-12"><input type="text" name="subject" class="form-control apex-input" placeholder="Subject" required></div>
-                                <div class="col-12"><textarea name="message" rows="5" class="form-control apex-input" placeholder="Your Message" required></textarea></div>
+                                <div class="col-12"><textarea name="message" rows="15" class="form-control apex-input" placeholder="Your Message" required></textarea></div>
                                 <div class="col-12"><button type="submit" name="submit_contact" class="btn apex-btn-glow w-100">Send Message <i class="fas fa-paper-plane ms-2"></i></button></div>
                             </div>
                         </form>
