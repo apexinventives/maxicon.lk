@@ -38,16 +38,211 @@ try {
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
     <style>
+        /* ---------- GLOBAL VARIABLES - SaaS Style with Glow ---------- */
+        :root {
+            --apex-orange: #f57c00;
+            --apex-orange-dark: #e65100;
+            --apex-orange-light: #fff3e0;
+            --apex-orange-glow: rgba(245, 124, 0, 0.4);
+            --apex-orange-glow-strong: rgba(245, 124, 0, 0.6);
+            --apex-white: #ffffff;
+            --apex-dark: #0a0a0f;
+            --apex-gray-bg: #f8fafc;
+            --apex-text-dark: #1a1a2e;
+            --apex-text-muted: #64748b;
+            --apex-shadow-sm: 0 10px 30px -10px rgba(0,0,0,0.05);
+            --apex-shadow-md: 0 20px 40px -15px rgba(0,0,0,0.1);
+            --apex-shadow-glow: 0 0 30px rgba(245, 124, 0, 0.15);
+            --apex-border-glow: 1px solid rgba(245, 124, 0, 0.2);
+        }
+        
         * {
-            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         body {
-            background: linear-gradient(135deg, #f8fafc 0%, #fef9f0 100%);
-            min-height: 100vh;
+            font-family: Inter, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #ffffff 0%, #fef9f0 100%);
+            color: var(--apex-text-dark);
+            scroll-behavior: smooth;
+            overflow-x: hidden;
         }
         
+        /* ========== TOP BAR ========== */
+        .apex-topbar {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            padding: 8px 0;
+            font-size: 0.85rem;
+            border-bottom: 1px solid rgba(245,124,0,0.15);
+            position: relative;
+            z-index: 1001;
+        }
+        .apex-topbar a { color: #555; text-decoration: none; transition: 0.2s; }
+        .apex-topbar a:hover { color: var(--apex-orange); }
+        
+        /* ========== MODERN SAAS NAVBAR ========== */
+        .apex-navbar {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 2px 25px rgba(0,0,0,0.03), 0 1px 0 rgba(245,124,0,0.1);
+            padding: 0.7rem 0;
+            transition: all 0.3s ease;
+            position: sticky;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        
+        .apex-navbar.scrolled {
+            background: rgba(255,255,255,0.98);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.08);
+            padding: 0.4rem 0;
+        }
+        
+        .apex-brand {
+            font-family: Inter, 'Segoe UI', Roboto, sans-serif;
+            font-weight: 800;
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #1e1e2a 0%, #f57c00 80%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.5px;
+            text-decoration: none;
+        }
+        
+        .apex-nav-link {
+            font-weight: 550;
+            color: #2c2c36 !important;
+            margin: 0 0.6rem;
+            transition: 0.2s;
+            position: relative;
+            font-size: 0.95rem;
+            text-decoration: none;
+        }
+        .apex-nav-link:hover, .apex-nav-link.active { color: var(--apex-orange) !important; }
+        .apex-nav-link::after {
+            content: ''; position: absolute; bottom: -6px; left: 0; width: 0;
+            height: 2.5px; background: linear-gradient(90deg, var(--apex-orange), #ffb347);
+            transition: 0.3s; border-radius: 4px;
+        }
+        .apex-nav-link:hover::after, .apex-nav-link.active::after { width: 100%; }
+        
+        .apex-btn-glow {
+            background: linear-gradient(135deg, var(--apex-orange), #ff9f4a);
+            border: none;
+            color: white;
+            border-radius: 40px;
+            padding: 10px 28px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(245,124,0,0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+        .apex-btn-glow:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(245,124,0,0.4);
+            color: white;
+        }
+        
+        .apex-btn-outline-glow {
+            background: transparent;
+            border: 1.5px solid var(--apex-orange);
+            color: var(--apex-orange);
+            border-radius: 40px;
+            padding: 8px 24px;
+            font-weight: 600;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .apex-btn-outline-glow:hover {
+            background: var(--apex-orange);
+            color: white;
+            box-shadow: 0 0 15px rgba(245,124,0,0.3);
+        }
+        
+        /* Dropdown styles */
+        .dropdown-menu {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.95);
+        }
+        .dropdown-item:hover { background: var(--apex-orange-light); color: var(--apex-orange); }
+        
+        /* ========== HERO SECTION ========== */
+        .apex-hero-slider {
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+            background: linear-gradient(135deg, #ffffff 0%, #fff8f0 100%);
+        }
+        
+        .apex-slide {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 100px 20px;
+            min-height: 60vh;
+            position: relative;
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+        }
+        .apex-slide::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 100%);
+            z-index: 1;
+        }
+        .apex-slide-content { max-width: 850px; margin: 0 auto; z-index: 2; position: relative; }
+        .apex-slide-title {
+            font-family: Inter, 'Segoe UI', Roboto, sans-serif;
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #ffffff 0%, #ffe0b3 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1.2rem;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .apex-slide-highlight { 
+            background: linear-gradient(135deg, #f57c00, #ffb347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .apex-slide-text { font-size: 1.2rem; color: rgba(255,255,255,0.9); margin-bottom: 2rem; line-height: 1.6; }
+        .apex-badge-glow {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.4);
+            border-radius: 60px;
+            padding: 6px 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1.8rem;
+            color: #fff;
+        }
+        
+        /* Main Card Styles */
         .main-card {
             background: white;
             border-radius: 32px;
@@ -204,92 +399,13 @@ try {
             color: white;
         }
         
-        @media (max-width: 768px) {
-            .main-card { margin: 15px; }
-            .card-header-custom { padding: 20px; }
-            .stat-box h2 { font-size: 1.5rem; }
-        }
-
-        /* Shared navbar/footer styles */
-        :root {
-            --apex-orange: #f57c00;
-            --apex-orange-light: #fff3e0;
-            --apex-orange-dark: #e65100;
-            --apex-text-dark: #1a1a2e;
-        }
-        body {
-            padding-top: 150px;
-        }
-        .apex-topbar {
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(10px);
-            padding: 8px 0;
-            font-size: 0.85rem;
-            border-bottom: 1px solid rgba(245,124,0,0.15);
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1002;
-        }
-        .apex-topbar a { color: #555; text-decoration: none; }
-        .apex-topbar a:hover { color: var(--apex-orange); }
-        /* ========== MODERN SAAS NAVBAR ========== */
-        .apex-navbar {
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(12px);
-            box-shadow: 0 2px 25px rgba(0,0,0,0.03), 0 1px 0 rgba(245,124,0,0.1);
-            padding: 0.7rem 0;
-            transition: all 0.3s ease;
-            position: fixed;
-            top: 38px;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
-        body {
-            padding-top: 150px;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        .page-content {
-            flex: 1;
-        }
-        .apex-navbar.scrolled {
-            background: rgba(255,255,255,0.98);
-            box-shadow: 0 4px 30px rgba(0,0,0,0.08);
-            padding: 0.4rem 0;
-            top: 0;
-        }
-        .apex-brand {
-            font-weight: 800;
-            font-size: 1.75rem;
-            color: #1a1a2e;
-            text-decoration: none;
-        }
-        .apex-nav-link {
-            font-weight: 550;
-            color: #2c2c36 !important;
-            margin: 0 0.5rem;
-            transition: 0.2s;
-            text-decoration: none;
-        }
-        .apex-nav-link:hover, .apex-nav-link.active { color: var(--apex-orange) !important; }
-        .apex-btn-glow {
-            background: linear-gradient(135deg, var(--apex-orange), #ff9f4a);
-            border: none;
-            color: white;
-            border-radius: 40px;
-            padding: 10px 22px;
-            font-weight: 600;
-            text-decoration: none;
-        }
-        .apex-btn-glow:hover { transform: translateY(-2px); }
+        /* Footer */
         .apex-footer {
             background: linear-gradient(135deg, #0a0a0f 0%, #111118 100%);
             color: #cbcbd4;
             padding: 60px 0 30px;
+            position: relative;
+            margin-top: 60px;
         }
         .apex-footer::before {
             content: '';
@@ -300,9 +416,10 @@ try {
             height: 1px;
             background: linear-gradient(90deg, transparent, var(--apex-orange), transparent);
         }
-        .apex-footer h3, .apex-footer h5 { color: white; }
         .apex-footer a { color: #cbcbd4; text-decoration: none; }
         .apex-footer a:hover { color: var(--apex-orange); }
+        
+        /* Back to top */
         .back-to-top {
             position: fixed;
             bottom: 30px;
@@ -315,23 +432,205 @@ try {
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 999;
+            text-decoration: none;
+            z-index: 99;
             transition: 0.3s;
             opacity: 0;
             visibility: hidden;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(245,124,0,0.3);
         }
         .back-to-top.active { opacity: 1; visibility: visible; }
-        .back-to-top:hover { transform: translateY(-5px); }
+        .back-to-top:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(245,124,0,0.4); color: white; }
+        
+        .navbar-toggler { border: none; }
+        .navbar-toggler:focus { box-shadow: none; }
+        
+        .input-group {
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border-radius: 60px;
+            overflow: hidden;
+        }
+        .input-group input {
+            border: none;
+            padding: 15px 25px;
+            font-size: 1rem;
+        }
+        .input-group .btn-submit {
+            width: auto;
+            padding: 15px 35px;
+        }
+        
+        .page-content {
+            min-height: 60vh;
+        }
+
+        /* ========== MOBILE RESPONSIVE FOR RESULTS VIEW AREA ONLY ========== */
+        @media (max-width: 768px) {
+            /* Student info card responsive */
+            .main-card .card-body .bg-light .row > div {
+                margin-bottom: 12px;
+            }
+            .main-card .card-body .bg-light .row > div:last-child {
+                margin-bottom: 0;
+            }
+            
+            /* Results table - make it horizontally scrollable */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .result-table {
+                min-width: 650px;
+            }
+            
+            .result-table th,
+            .result-table td {
+                padding: 8px 10px;
+                font-size: 0.8rem;
+                white-space: nowrap;
+            }
+            
+            .result-table th:first-child,
+            .result-table td:first-child {
+                position: sticky;
+                left: 0;
+                background: white;
+                z-index: 1;
+            }
+            
+            .result-table th:first-child {
+                background: #fff3e0;
+                z-index: 2;
+            }
+            
+            .badge-grade {
+                padding: 3px 8px;
+                font-size: 0.7rem;
+                white-space: nowrap;
+            }
+            
+            /* Analysis cards responsive */
+            .analysis-card {
+                padding: 15px;
+            }
+            
+            .analysis-card h4 {
+                font-size: 1.2rem;
+                margin-bottom: 20px;
+            }
+            
+            .stat-box {
+                padding: 12px 8px;
+            }
+            
+            .stat-box i {
+                font-size: 1.3rem;
+                margin-bottom: 5px;
+            }
+            
+            .stat-box h2 {
+                font-size: 1.2rem;
+            }
+            
+            .stat-box p {
+                font-size: 0.7rem;
+            }
+            
+            /* Chart containers responsive */
+            .analysis-card canvas {
+                max-height: 200px !important;
+            }
+            
+            .analysis-card .row .col-md-6 {
+                margin-bottom: 20px;
+            }
+            
+            .analysis-card .row .col-md-6:last-child {
+                margin-bottom: 0;
+            }
+            
+            /* Insight text responsive */
+            .insight-text {
+                padding: 12px 15px;
+                font-size: 0.85rem;
+            }
+            
+            .insight-text i {
+                font-size: 0.9rem;
+            }
+            
+            /* Download button responsive */
+            .download-btn {
+                padding: 10px 20px;
+                font-size: 0.85rem;
+            }
+            
+            /* Card header responsive */
+            .card-header-custom {
+                padding: 15px 20px;
+            }
+            
+            .card-header-custom h3 {
+                font-size: 1.2rem;
+            }
+            
+            .card-header-custom p {
+                font-size: 0.75rem;
+            }
+            
+            .btn-back {
+                padding: 6px 15px;
+                font-size: 0.75rem;
+            }
+            
+            /* Card body padding */
+            .main-card .card-body {
+                padding: 15px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            /* Extra small devices */
+            .result-table {
+                min-width: 580px;
+            }
+            
+            .result-table th,
+            .result-table td {
+                padding: 6px 8px;
+                font-size: 0.7rem;
+            }
+            
+            .stat-box h2 {
+                font-size: 1rem;
+            }
+            
+            .stat-box p {
+                font-size: 0.6rem;
+            }
+            
+            .analysis-card h4 {
+                font-size: 1rem;
+            }
+            
+            .insight-text {
+                font-size: 0.75rem;
+                padding: 10px 12px;
+            }
+        }
     </style>
     
 </head>
 <body>
 
+<!-- Top Bar - IDENTICAL to index.php -->
 <div class="apex-topbar d-none d-md-block">
     <div class="container d-flex justify-content-between">
         <div>
             <i class="fas fa-envelope me-2" style="color: #f57c00;"></i> <a href="mailto:info@maxicon.lk">info@maxicon.lk</a>
-            <i class="fas fa-phone-alt ms-3 me-2" style="color: #f57c00;"></i> <span>0777 198 096</span>
+            <i class="fas fa-phone-alt ms-3 me-2" style="color: #f57c00;"></i> <span>+94 75 909 8096</span>
         </div>
         <div>
             <a href="#" class="me-2"><i class="fab fa-twitter"></i></a>
@@ -342,9 +641,10 @@ try {
     </div>
 </div>
 
-<nav class="navbar navbar-expand-lg navbar-light apex-navbar">
+<!-- Modern SaaS Navbar - IDENTICAL to index.php -->
+<nav class="navbar navbar-expand-lg apex-navbar">
     <div class="container">
-        <a class="navbar-brand apex-brand" href="index.php">Maxicon Institute</a>
+        <a class="navbar-brand apex-brand" href="index.php">Maxicon<span style="color:#f57c00;"></span> Institute</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -352,6 +652,7 @@ try {
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
                 <li class="nav-item"><a class="nav-link apex-nav-link" href="index.php#home">Home</a></li>
                 <li class="nav-item"><a class="nav-link apex-nav-link" href="index.php#about">About</a></li>
+                <li class="nav-item"><a class="nav-link apex-nav-link" href="index.php#timeline">Timeline</a></li>
                 <li class="nav-item"><a class="nav-link apex-nav-link" href="index.php#services">Services</a></li>
                 <li class="nav-item"><a class="nav-link apex-nav-link" href="index.php#portfolio">Gallery</a></li>
                 <li class="nav-item dropdown">
@@ -381,6 +682,21 @@ try {
         </div>
     </div>
 </nav>
+
+<!-- Hero Section - Styled consistently with index.php -->
+<section id="home" class="apex-hero-slider">
+    <div class="apex-slide" style="background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('assets/img/DSC04577.jpg');">
+        <div class="apex-slide-content" data-aos="fade-up">
+            <div class="apex-badge-glow"><i class="fas fa-chart-line me-1"></i> New Exam Series 2026</div>
+            <h1 class="apex-slide-title">Track Your <span class="apex-slide-highlight">Exam Performance</span> Instantly</h1>
+            <p class="apex-slide-text">Search by Exam ID, download results, and review weekly progress from our latest series.</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="#results-form" class="btn apex-btn-glow">View Results</a>
+                <a href="index.php#contact" class="btn apex-btn-outline-glow">Contact Us</a>
+            </div>
+        </div>
+    </div>
+</section>
 
 <div class="page-content">
     <div class="container">
@@ -658,16 +974,16 @@ try {
                     <p class="text-muted">Your Exam ID is provided by the institute</p>
                 </div>
                 
-                <form method="POST" class="row justify-content-center">
+                <form id="results-form" method="POST" class="row justify-content-center">
                     <div class="col-md-8">
-                        <div class="input-group" style="box-shadow: 0 5px 20px rgba(0,0,0,0.1); border-radius: 60px; overflow: hidden;">
-                            <input type="text" name="exam_id" class="form-control" placeholder="Enter Exam ID (e.g., MAX11SAM123)" style="border: none; padding: 15px 25px; font-size: 1rem;" required>
-                            <button type="submit" name="submit" class="btn-submit" style="width: auto; padding: 15px 35px;">
+                        <div class="input-group">
+                            <input type="text" name="exam_id" class="form-control" placeholder="Enter Exam ID (e.g., MAX11SAM123)" required>
+                            <button type="submit" name="submit" class="btn-submit">
                                 <i class="fas fa-arrow-right me-2"></i> View Results
                             </button>
                         </div>
                         <div class="text-center mt-3">
-                            <small class="text-muted">Don't have an Exam ID? <a  style="color:#f57c00;">Contact your Class Cordinator</a></small>
+                            <small class="text-muted">Don't have an Exam ID? <a style="color:#f57c00;">Contact your Class Coordinator</a></small>
                         </div>
                     </div>
                 </form>
@@ -689,8 +1005,8 @@ try {
     <div class="container position-relative">
         <div class="row g-4">
             <div class="col-md-4">
-                <h3>Maxicon Institute</h3>
-                <p class="mt-3 text-white-50">145/2/2 Kandy Rd, Kiribathgoda 11600<br><strong class="text-warning">Phone:</strong>+94 75 909 8096<br><strong class="text-warning">Email:</strong> info@maxicon.lk</p>
+                <h3 class="text-white">Maxicon Institute</h3>
+                <p class="mt-3 text-white-50">145/2/2 Kandy Rd, Kiribathgoda 11600<br><strong class="text-warning">Phone:</strong> +94 75 909 8096<br><strong class="text-warning">Email:</strong> info@maxicon.lk</p>
             </div>
             <div class="col-md-4">
                 <h5 class="text-warning">Quick Links</h5>
@@ -717,8 +1033,54 @@ try {
 
 <a class="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="fas fa-arrow-up"></i></a>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
+    AOS.init({ duration: 1000, once: true, offset: 100 });
+    
+    // Navbar scroll effect - EXACTLY like index.php
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.apex-navbar');
+        const backToTop = document.querySelector('.back-to-top');
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+            backToTop.classList.add('active');
+        } else {
+            navbar.classList.remove('scrolled');
+            backToTop.classList.remove('active');
+        }
+        
+        // Active section highlighting (like index.php)
+        let current = '';
+        const sections = document.querySelectorAll('section');
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop - 200;
+            if (pageYOffset >= sectionTop) {
+                current = section.getAttribute('id');
+            }
+        });
+        document.querySelectorAll('.apex-nav-link').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === '#' + current) {
+                link.classList.add('active');
+            }
+        });
+    });
+    
+    // Smooth scroll for anchor links (like index.php)
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target && this.getAttribute('href') !== '#') {
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    });
+</script>
+
 <?php if (!empty($marks) && isset($scoresForChart)): ?>
+<script>
     // Progress Chart
     const ctx = document.getElementById('progressChart').getContext('2d');
     new Chart(ctx, {
@@ -820,21 +1182,8 @@ try {
             }
         }
     });
-
-    const navbar = document.querySelector('.apex-navbar');
-    const backToTop = document.querySelector('.back-to-top');
-    window.addEventListener('scroll', function() {
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
-            backToTop.classList.add('active');
-        } else {
-            navbar.classList.remove('scrolled');
-            backToTop.classList.remove('active');
-        }
-    });
-<?php endif; ?>
 </script>
+<?php endif; ?>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
