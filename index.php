@@ -202,6 +202,14 @@
             color: white;
             box-shadow: 0 0 15px rgba(245,124,0,0.3);
         }
+
+        .apex-full-logo {
+            max-width: 760px;
+            width: 100%;
+            height: auto;
+            border-radius: 22px;
+            background: #ffffff;
+        }
         
         /* Dropdown styles */
         .dropdown-menu {
@@ -590,6 +598,32 @@
             box-shadow: 0 0 20px rgba(245,124,0,0.2);
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .timeline-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .timeline-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            padding: 0.95rem 0;
+            border-bottom: 1px solid rgba(245,124,0,0.15);
+        }
+        .timeline-list li:last-child {
+            border-bottom: none;
+        }
+        .timeline-list strong {
+            color: #1c1c29;
+            font-weight: 600;
+        }
+        .timeline-time {
+            color: var(--apex-orange);
+            font-weight: 700;
+        }
     </style>
     
 </head>
@@ -625,6 +659,7 @@
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
                 <li class="nav-item"><a class="nav-link apex-nav-link active" href="#home">Home</a></li>
                 <li class="nav-item"><a class="nav-link apex-nav-link" href="#about">About</a></li>
+                <li class="nav-item"><a class="nav-link apex-nav-link" href="#timeline">Timeline</a></li>
                 <li class="nav-item"><a class="nav-link apex-nav-link" href="#services">Services</a></li>
                 <li class="nav-item"><a class="nav-link apex-nav-link" href="#portfolio">Gallery</a></li>
                 <li class="nav-item dropdown">
@@ -727,7 +762,10 @@
     <section class="apex-section">
         <div class="container">
             <div class="text-center" data-aos="fade-up">
-                <h2 class="apex-section-title">Popular <span class="apex-title-orange">Exams</span></h2>
+                <div class="text-center mb-4" data-aos="zoom-in">
+                    <img src="assets/img/maxicon-logo.png" alt="Maxicon Logo" class="img-fluid apex-full-logo">
+                </div>
+                <h2 class="apex-section-title">Maxicon Popular <span class="apex-title-orange">Exams Categories</span></h2>
                 <div class="apex-underline"></div>
                 <p class="text-muted">To view the exam results, click on the selected exam name</p>
             </div>
@@ -804,6 +842,50 @@
         </div>
     </div>
 </section>
+
+    <section id="timeline" class="apex-section apex-section-light">
+        <div class="container">
+            <div class="text-center" data-aos="fade-up">
+                <h2 class="apex-section-title">Weekly <span class="apex-title-orange">Timeline</span></h2>
+                <div class="apex-underline"></div>
+                <p class="text-muted">Samitha Sir's Class schedules for Maxicon Eco and Maxicon Old centers.</p>
+            </div>
+            <div class="row g-4 mt-4">
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="apex-glass-card h-100">
+                        <h3 class="mb-3">Place: Maxicon Eco</h3>
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=Maxicon+Eco" target="_blank" rel="noopener noreferrer" class="apex-btn-outline-glow mb-4 d-inline-flex align-items-center">
+                            <i class="fas fa-map-marker-alt me-2"></i> View Google Map Directions
+                        </a>
+                        <ul class="timeline-list">
+                            <li><strong>Grade 6 - Sinhala medium</strong><span class="timeline-time">SATURDAY 3.35 - 5.35 PM</span></li>
+                            <li><strong>Grade 7 - Sinhala medium</strong><span class="timeline-time">SATURDAY 5.30 - 7.30 PM</span></li>
+                            <li><strong>Grade 8 - Sinhala medium</strong><span class="timeline-time">SATURDAY 11.30 - 1.00 PM</span></li>
+                            <li><strong>Grade 9 - Sinhala medium</strong><span class="timeline-time">SATURDAY 1.30 - 3.30 PM</span></li>
+                            <li><strong>Grade 10 - Sinhala medium</strong><span class="timeline-time">TUESDAY 5.45 - 9.45 PM</span></li>
+                            <li><strong>Grade 11 - Sinhala medium</strong><span class="timeline-time">TUESDAY 3.30 - 5.30 PM</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="apex-glass-card h-100">
+                        <h3 class="mb-3">Place: Maxicon Old</h3>
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=Maxicon+Old" target="_blank" rel="noopener noreferrer" class="apex-btn-outline-glow mb-4 d-inline-flex align-items-center">
+                            <i class="fas fa-map-marker-alt me-2"></i> View Google Map Directions
+                        </a>
+                        <ul class="timeline-list">
+                            <li><strong>Grade 6 - English medium</strong><span class="timeline-time">MONDAY 5.30 - 7.30 PM</span></li>
+                            <li><strong>Grade 7 - English medium</strong><span class="timeline-time">SATURDAY 7.30 - 9.30 AM</span></li>
+                            <li><strong>Grade 8 - English medium</strong><span class="timeline-time">SATURDAY 7.30 - 9.00 AM</span></li>
+                            <li><strong>Grade 9 - English medium</strong><span class="timeline-time">THURSDAY 5.45 - 9.45 PM</span></li>
+                            <li><strong>Grade 10 - English medium</strong><span class="timeline-time">TUESDAY 5.45 - 9.45 PM</span></li>
+                            <li><strong>Grade 11 - English medium</strong><span class="timeline-time">THURSDAY 3.30 - 5.30 PM</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Skills, Counts, Services, Gallery, FAQ, Contact sections remain fully intact from original but excluded for brevity, they work perfectly -->
     <section class="apex-section bg-dark">
@@ -894,11 +976,11 @@
             <div class="row justify-content-center mt-4">
                 <div class="col-xl-9">
                     <div class="faq-list">
-                        <div class="question">📖 How do children view results? <i class="fas fa-chevron-down float-end"></i></div>
+                        <div class="question">How do children view results? <i class="fas fa-chevron-down float-end"></i></div>
                         <div style="display:none; padding:20px; background:#f9f9f9; border-radius:16px; margin-top:-10px; margin-bottom:15px;">Students can get their exam information through the links given above. For this, their index number must be entered.</div>
-                        <div class="question mt-2">🔄 How can I request Re-Correction for exams? <i class="fas fa-chevron-down float-end"></i></div>
+                        <div class="question mt-2">How can I request Re-Correction for exams? <i class="fas fa-chevron-down float-end"></i></div>
                         <div style="display:none; padding:20px; background:#f9f9f9; border-radius:16px; margin-top:-10px; margin-bottom:15px;">You can get the recorrection results within 4 to 5 days after providing the requested information via the recorrection link.</div>
-                        <div class="question mt-2">👨‍🏫 How can I connect with Samitha Fernando Sir? <i class="fas fa-chevron-down float-end"></i></div>
+                        <div class="question mt-2"> How can I connect with Samitha Fernando Sir? <i class="fas fa-chevron-down float-end"></i></div>
                         <div style="display:none; padding:20px; background:#f9f9f9; border-radius:16px; margin-top:-10px;">Contact via our hotline +94 75 909 8096 or email info@maxicon.lk</div>
                     </div>
                 </div>

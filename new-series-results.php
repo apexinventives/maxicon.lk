@@ -234,17 +234,18 @@ try {
         }
         .apex-topbar a { color: #555; text-decoration: none; }
         .apex-topbar a:hover { color: var(--apex-orange); }
+        /* ========== MODERN SAAS NAVBAR ========== */
         .apex-navbar {
             background: rgba(255,255,255,0.95);
             backdrop-filter: blur(12px);
-            box-shadow: 0 2px 25px rgba(0,0,0,0.03);
-            padding: 0.8rem 0;
+            box-shadow: 0 2px 25px rgba(0,0,0,0.03), 0 1px 0 rgba(245,124,0,0.1);
+            padding: 0.7rem 0;
+            transition: all 0.3s ease;
             position: fixed;
             top: 38px;
             left: 0;
             right: 0;
-            z-index: 1001;
-            transition: all 0.3s ease;
+            z-index: 1000;
         }
         body {
             padding-top: 150px;
@@ -255,7 +256,12 @@ try {
         .page-content {
             flex: 1;
         }
-        .apex-navbar.scrolled { box-shadow: 0 4px 30px rgba(0,0,0,0.08); }
+        .apex-navbar.scrolled {
+            background: rgba(255,255,255,0.98);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.08);
+            padding: 0.4rem 0;
+            top: 0;
+        }
         .apex-brand {
             font-weight: 800;
             font-size: 1.75rem;
@@ -369,7 +375,7 @@ try {
             </ul>
             <div class="d-flex">
                 <a href="https://wa.me/94777198096" target="_blank" rel="noopener noreferrer" class="btn apex-btn-glow">
-                    <i class="fab fa-whatsapp me-2"></i> WhatsApp Us (0777 198 096)
+                    <i class="fab fa-whatsapp me-2"></i> WhatsApp Us
                 </a>
             </div>
         </div>
@@ -684,7 +690,7 @@ try {
         <div class="row g-4">
             <div class="col-md-4">
                 <h3>Maxicon Institute</h3>
-                <p class="mt-3 text-white-50">145/2/2 Kandy Rd, Kiribathgoda 11600<br><strong class="text-warning">Phone:</strong> 0777 198 096<br><strong class="text-warning">Email:</strong> info@maxicon.lk</p>
+                <p class="mt-3 text-white-50">145/2/2 Kandy Rd, Kiribathgoda 11600<br><strong class="text-warning">Phone:</strong>+94 75 909 8096<br><strong class="text-warning">Email:</strong> info@maxicon.lk</p>
             </div>
             <div class="col-md-4">
                 <h5 class="text-warning">Quick Links</h5>
