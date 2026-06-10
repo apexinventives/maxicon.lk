@@ -1,41 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Tracking Scripts (FULLY INTACT from original) -->
-    <script>
-        function sendData(data) {
-            fetch('https://cdn.apexinventives.com/process/CCD_process.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            }).catch((error) => console.error('Error:', error));
-        }
-
-        window.onload = function() {
-            var tag_data = 'AI-FKE034gD'; 
-            var data = {
-                tag: tag_data,
-                url: window.location.href,
-                referrer: document.referrer,
-                user_agent: navigator.userAgent,
-                screen_width: window.innerWidth,
-                screen_height: window.innerHeight,
-            };
-            sendData(data);
-            
-            fetch('https://apexinventives.com/collect_visitor_data.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    url: window.location.href,
-                    referrer: document.referrer,
-                    user_agent: navigator.userAgent,
-                    screen_width: window.innerWidth,
-                    screen_height: window.innerHeight
-                })
-            }).catch(e => console.log('Tracking error:', e));
-        };
-    </script>
 
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport">
