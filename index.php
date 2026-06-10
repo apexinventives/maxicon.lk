@@ -43,9 +43,6 @@
     <meta content="Maxicon Institute - Sri Lanka's leading examination platform for Grade 6-11 Mathematics" name="description">
     <meta content="Maxicon, Exams, Mathematics, Sri Lanka, OL, AL, Samitha Fernando" name="keywords">
 
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f57c00'/%3E%3Ctext x='50' y='67' font-size='50' text-anchor='middle' fill='white' font-weight='bold'%3EM%3C/text%3E%3C/svg%3E">
-    
     <!-- Google Fonts - Modern SaaS Style -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
@@ -58,7 +55,12 @@
     
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
+
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="maxicon.lk/img/assets/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon/favicon-16x16.png">
+    <link rel="manifest" href="assets/img/favicon/site.webmanifest">
+
     <style>
         /* ---------- GLOBAL VARIABLES - SaaS Style with Glow ---------- */
         :root {
@@ -567,6 +569,18 @@
         .back-to-top.active { opacity: 1; visibility: visible; }
         .back-to-top:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(245,124,0,0.4); color: white; }
         
+        @media (max-width: 1200px) {
+            .apex-navbar { padding: 0.55rem 0; }
+            .apex-nav-link { margin: 0 0.4rem; }
+            .apex-btn-glow, .apex-btn-outline-glow { padding: 10px 20px; }
+            .apex-hero-slider { margin-top: 90px; }
+            .apex-slide-title { font-size: 3.2rem; }
+            .apex-slide-text { font-size: 1rem; }
+            .apex-section { padding: 60px 0; }
+            .apex-section-title { font-size: 2rem; }
+            .apex-section p { font-size: 0.95rem; }
+        }
+
         @media (max-width: 768px) {
             .apex-slide-title { font-size: 2.2rem; }
             .apex-section { padding: 60px 0; }
@@ -660,7 +674,6 @@
                 <li class="nav-item"><a class="nav-link apex-nav-link active" href="#home">Home</a></li>
                 <li class="nav-item"><a class="nav-link apex-nav-link" href="#about">About</a></li>
                 <li class="nav-item"><a class="nav-link apex-nav-link" href="#timeline">Timeline</a></li>
-                <li class="nav-item"><a class="nav-link apex-nav-link" href="#services">Services</a></li>
                 <li class="nav-item"><a class="nav-link apex-nav-link" href="#portfolio">Gallery</a></li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Exams</a>
@@ -684,7 +697,7 @@
             </ul>
             <div class="d-flex">
                 <a href="https://wa.me/94777198096" target="_blank" rel="noopener noreferrer" class="btn apex-btn-glow">
-                    <i class="fab fa-whatsapp me-2"></i> WhatsApp Us
+                     WhatsApp
                 </a>
             </div>
         </div>

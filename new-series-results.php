@@ -41,6 +41,11 @@ try {
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="maxicon.lk/img/assets/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon/favicon-16x16.png">
+    <link rel="manifest" href="assets/img/favicon/site.webmanifest">
+
     <style>
         /* ---------- GLOBAL VARIABLES - SaaS Style with Glow ---------- */
         :root {
@@ -653,7 +658,6 @@ try {
                 <li class="nav-item"><a class="nav-link apex-nav-link" href="index.php#home">Home</a></li>
                 <li class="nav-item"><a class="nav-link apex-nav-link" href="index.php#about">About</a></li>
                 <li class="nav-item"><a class="nav-link apex-nav-link" href="index.php#timeline">Timeline</a></li>
-                <li class="nav-item"><a class="nav-link apex-nav-link" href="index.php#services">Services</a></li>
                 <li class="nav-item"><a class="nav-link apex-nav-link" href="index.php#portfolio">Gallery</a></li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Exams</a>
@@ -676,7 +680,7 @@ try {
             </ul>
             <div class="d-flex">
                 <a href="https://wa.me/94777198096" target="_blank" rel="noopener noreferrer" class="btn apex-btn-glow">
-                    <i class="fab fa-whatsapp me-2"></i> WhatsApp Us
+                    WhatsApp
                 </a>
             </div>
         </div>
@@ -707,9 +711,7 @@ try {
                     <h3><i class="fas fa-chart-line me-2"></i> Exam Results Portal</h3>
                     <p class="mb-0 mt-2 opacity-75">Enter your Exam ID to view your performance</p>
                 </div>
-                <div class="col col-sm-6 text-end">
-                    <a href="index.php" class="btn-back"><i class="fas fa-home me-2"></i> Back to Home</a>
-                </div>
+
             </div>
         </div>
         
@@ -978,10 +980,11 @@ try {
                     <div class="col-md-8">
                         <div class="input-group">
                             <input type="text" name="exam_id" class="form-control" placeholder="Enter Exam ID (e.g., MAX11SAM123)" required>
-                            <button type="submit" name="submit" class="btn-submit">
+
+                        </div>
+                            <button type="submit" name="submit" class="btn-submit mt-3 w-100">
                                 <i class="fas fa-arrow-right me-2"></i> View Results
                             </button>
-                        </div>
                         <div class="text-center mt-3">
                             <small class="text-muted">Don't have an Exam ID? <a style="color:#f57c00;">Contact your Class Coordinator</a></small>
                         </div>
