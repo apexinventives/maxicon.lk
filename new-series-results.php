@@ -693,11 +693,7 @@ try {
         <div class="apex-slide-content" data-aos="fade-up">
             <div class="apex-badge-glow"><i class="fas fa-chart-line me-1"></i> New Exam Series 2026</div>
             <h1 class="apex-slide-title">Track Your <span class="apex-slide-highlight">Exam Performance</span> Instantly</h1>
-            <p class="apex-slide-text">Search by Exam ID, download results, and review weekly progress from our latest series.</p>
-            <div class="d-flex gap-3 justify-content-center flex-wrap">
-                <a href="#results-form" class="btn apex-btn-glow">View Results</a>
-                <a href="index.php#contact" class="btn apex-btn-outline-glow">Contact Us</a>
-            </div>
+
         </div>
     </div>
 </section>
@@ -997,7 +993,7 @@ try {
         
         <?php if ($download_button): ?>
         <div class="card-footer text-center p-4" style="background: #f8fafc;">
-            <?php echo $download_button; ?>
+            <?php //echo $download_button; ?>
         </div>
         <?php endif; ?>
     </div>
