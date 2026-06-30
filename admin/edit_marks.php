@@ -8,7 +8,6 @@ $selectedStudent = $_GET['exam_id'] ?? '';
 $marks = [];
 $studentName = '';
 
-// Search students
 $students = [];
 if (!empty($search)) {
     $stmt = $pdo->prepare("SELECT exam_id, student_name, grade, medium FROM students WHERE student_name LIKE ? OR exam_id LIKE ? ORDER BY student_name LIMIT 50");
@@ -19,7 +18,6 @@ if (!empty($search)) {
     $stmt->execute([$selectedStudent]);
     $students = $stmt->fetchAll();
 } else {
-    // Show recent students
     $stmt = $pdo->query("SELECT exam_id, student_name, grade, medium FROM students ORDER BY created_at DESC LIMIT 20");
     $students = $stmt->fetchAll();
 }
@@ -39,14 +37,12 @@ if ($selectedStudent) {
     $marks = $stmt->fetchAll();
 }
 
-// Handle mark update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_marks'])) {
     foreach ($_POST['marks'] as $markId => $data) {
         $stmt = $pdo->prepare("UPDATE weekly_marks SET mission_20 = ?, homework = ?, total_score = ?, rank_position = ?, attendance = ? WHERE id = ?");
         $stmt->execute([$data['mission_20'], $data['homework'], $data['total'], $data['rank'], $data['attendance'], $markId]);
     }
     
-    // Recalculate ranks for this week
     if (!empty($marks)) {
         $weeksToUpdate = array_unique(array_column($marks, 'week_number'));
         foreach ($weeksToUpdate as $weekNum) {
@@ -70,7 +66,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_marks'])) {
     exit();
 }
 
-// Handle bulk update for all weeks
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_update'])) {
     $weekNumber = $_POST['week_number'] ?? 0;
     $attendance = $_POST['bulk_attendance'] ?? '';
@@ -105,6 +100,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_update'])) {
         header("Location: edit_marks.php?exam_id=$selectedStudent&success=1");
         exit();
     }
+}
+
+function getColumnLabel($grade) {
+    return in_array($grade, ['Grade 6', 'Grade 7', 'Grade 8', 'Grade 9']) ? 'Speed Test' : 'Mission 20';
 }
 ?>
 <!DOCTYPE html>
@@ -253,12 +252,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_update'])) {
         <?php endif; ?>
         
         <div class="row">
-            <!-- Left Side - Student Search -->
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm rounded-4 p-3">
                     <h5 class="mb-3"><i class="fas fa-search me-2" style="color:#f57c00;"></i> Find Student</h5>
                     
-                    <!-- Search Form -->
                     <form method="GET" action="">
                         <div class="search-box d-flex">
                             <input type="text" name="search" class="form-control flex-grow-1" placeholder="Search by name or Exam ID..." value="<?php echo htmlspecialchars($search); ?>" autocomplete="off">
@@ -268,7 +265,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_update'])) {
                     
                     <hr>
                     
-                    <!-- Student List -->
                     <div class="student-list mt-3" style="max-height: 500px; overflow-y: auto;">
                         <?php if (empty($students)): ?>
                             <div class="text-center text-muted py-4">
@@ -296,9 +292,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_update'])) {
                 </div>
             </div>
             
-            <!-- Right Side - Edit Marks -->
             <div class="col-md-8">
-                <?php if ($selectedStudent && $studentName): ?>
+                <?php if ($selectedStudent && $studentName): 
+                    $columnLabel = getColumnLabel($studentGrade);
+                ?>
                     <div class="card border-0 shadow-sm rounded-4 p-4">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div>
@@ -307,6 +304,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_update'])) {
                                     <code><?php echo $selectedStudent; ?></code> | 
                                     <?php echo $studentGrade; ?> | 
                                     <?php echo $studentMedium; ?> Medium
+                                    <span class="badge bg-info ms-2">Column: <?php echo $columnLabel; ?></span>
                                 </p>
                             </div>
                             <a href="edit_student.php?exam_id=<?php echo $selectedStudent; ?>" class="btn btn-outline-apex">
@@ -320,7 +318,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_update'])) {
                                 No marks found for this student. Please upload exam data first.
                             </div>
                         <?php else: ?>
-                            <!-- Bulk Update Section -->
                             <div class="bulk-card">
                                 <h6 class="mb-3"><i class="fas fa-layer-group me-2" style="color:#f57c00;"></i> Bulk Update for Specific Week</h6>
                                 <form method="POST" class="row g-2 align-items-end">
@@ -344,7 +341,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_update'])) {
                                         </select>
                                     </div>
                                     <div class="col-md-2">
-                                        <label class="form-label small">Mission 20</label>
+                                        <label class="form-label small"><?php echo $columnLabel; ?></label>
                                         <input type="number" name="bulk_mission20" class="form-control form-control-sm" style="border-radius: 60px;" placeholder="Score">
                                     </div>
                                     <div class="col-md-2">
@@ -359,7 +356,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_update'])) {
                                 </form>
                             </div>
                             
-                            <!-- Individual Marks Edit Form -->
                             <form method="POST">
                                 <div class="table-responsive">
                                     <table class="table table-bordered edit-table">
@@ -368,7 +364,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_update'])) {
                                                 <th>Week</th>
                                                 <th>Date</th>
                                                 <th>Attendance</th>
-                                                <th>Mission 20</th>
+                                                <th><?php echo $columnLabel; ?></th>
                                                 <th>Homework</th>
                                                 <th>Total</th>
                                                 <th>Rank</th>
@@ -432,7 +428,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_update'])) {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Auto-hide alerts after 5 seconds
     setTimeout(function() {
         const alerts = document.querySelectorAll('.alert');
         alerts.forEach(function(alert) {
@@ -440,16 +435,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_update'])) {
             bsAlert.close();
         });
     }, 5000);
-    
-    // Live search on student list (optional)
-    const searchInput = document.querySelector('input[name="search"]');
-    if (searchInput) {
-        searchInput.addEventListener('keyup', function(e) {
-            if (e.key === 'Enter') {
-                // Form will submit automatically
-            }
-        });
-    }
 </script>
 </body>
 </html>

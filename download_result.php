@@ -23,6 +23,10 @@ $stmt = $pdo->prepare("SELECT * FROM weekly_marks WHERE exam_id = ? ORDER BY wee
 $stmt->execute([$examId]);
 $marks = $stmt->fetchAll();
 
+// Determine column label based on grade
+$grade = $student['grade'];
+$columnLabel = in_array($grade, ['Grade 6', 'Grade 7', 'Grade 8', 'Grade 9']) ? 'Speed Test' : 'Mission 20';
+
 // Calculate statistics
 $totalWeeks = count($marks);
 $attendedWeeks = 0;
@@ -403,7 +407,7 @@ $download = isset($_GET['download']) && $_GET['download'] == 'pdf';
             </div>
         </div>
         
-        <!-- Marks Table -->
+        <!-- Marks Table with dynamic column name -->
         <table class="result-table">
             <thead>
                 <tr>
@@ -411,7 +415,7 @@ $download = isset($_GET['download']) && $_GET['download'] == 'pdf';
                     <th>Week</th>
                     <th>Date</th>
                     <th>Attendance</th>
-                    <th>Mission 20</th>
+                    <th><?php echo $columnLabel; ?></th>
                     <th>Homework</th>
                     <th>Total Score</th>
                     <th>Rank</th>
@@ -523,7 +527,6 @@ $download = isset($_GET['download']) && $_GET['download'] == 'pdf';
 </div>
 
 <script>
-    // Auto-show print dialog if download parameter is present
     <?php if ($download): ?>
     window.onload = function() {
         window.print();

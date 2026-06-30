@@ -9,6 +9,11 @@ $marks = [];
 $error = '';
 $download_button = '';
 
+// Helper function to get column label based on grade
+function getColumnLabel($grade) {
+    return in_array($grade, ['Grade 6', 'Grade 7', 'Grade 8', 'Grade 9']) ? 'Speed Test' : 'Mission 20';
+}
+
 // Get all exams/exam types for dropdown
 $examsList = [];
 try {
@@ -472,7 +477,6 @@ try {
 
         /* ========== MOBILE RESPONSIVE FOR RESULTS VIEW AREA ONLY ========== */
         @media (max-width: 768px) {
-            /* Student info card responsive */
             .main-card .card-body .bg-light .row > div {
                 margin-bottom: 12px;
             }
@@ -480,7 +484,6 @@ try {
                 margin-bottom: 0;
             }
             
-            /* Results table - make it horizontally scrollable */
             .table-responsive {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
@@ -516,7 +519,6 @@ try {
                 white-space: nowrap;
             }
             
-            /* Analysis cards responsive */
             .analysis-card {
                 padding: 15px;
             }
@@ -543,7 +545,6 @@ try {
                 font-size: 0.7rem;
             }
             
-            /* Chart containers responsive */
             .analysis-card canvas {
                 max-height: 200px !important;
             }
@@ -556,7 +557,6 @@ try {
                 margin-bottom: 0;
             }
             
-            /* Insight text responsive */
             .insight-text {
                 padding: 12px 15px;
                 font-size: 0.85rem;
@@ -566,13 +566,11 @@ try {
                 font-size: 0.9rem;
             }
             
-            /* Download button responsive */
             .download-btn {
                 padding: 10px 20px;
                 font-size: 0.85rem;
             }
             
-            /* Card header responsive */
             .card-header-custom {
                 padding: 15px 20px;
             }
@@ -590,14 +588,12 @@ try {
                 font-size: 0.75rem;
             }
             
-            /* Card body padding */
             .main-card .card-body {
                 padding: 15px !important;
             }
         }
 
         @media (max-width: 480px) {
-            /* Extra small devices */
             .result-table {
                 min-width: 580px;
             }
@@ -693,7 +689,6 @@ try {
         <div class="apex-slide-content" data-aos="fade-up">
             <div class="apex-badge-glow"><i class="fas fa-chart-line me-1"></i> New Exam Series 2026</div>
             <h1 class="apex-slide-title">Track Your <span class="apex-slide-highlight">Exam Performance</span> Instantly</h1>
-
         </div>
     </div>
 </section>
@@ -707,7 +702,6 @@ try {
                     <h3><i class="fas fa-chart-line me-2"></i> Exam Results Portal</h3>
                     <p class="mb-0 mt-2 opacity-75">Enter your Exam ID to view your performance</p>
                 </div>
-
             </div>
         </div>
         
@@ -723,6 +717,8 @@ try {
                     $studentData = $stmt->fetch();
                     
                     if ($studentData) {
+                        $columnLabel = getColumnLabel($studentData['grade']);
+                        
                         // Display student info
                         echo '
                         <div class="mb-4 p-3 bg-light rounded-4">
@@ -740,6 +736,9 @@ try {
                                     <p>' . htmlspecialchars($studentData['grade']) . ' - ' . htmlspecialchars($studentData['medium']) . ' Medium</p>
                                 </div>
                             </div>
+                            <div class="mt-2">
+                                <span class="badge bg-info">Column: ' . $columnLabel . '</span>
+                            </div>
                         </div>';
                         
                         // Get all weekly marks
@@ -748,7 +747,7 @@ try {
                         $marks = $stmt->fetchAll();
                         
                         if (!empty($marks)) {
-                            // Display results table
+                            // Display results table with dynamic column name
                             echo '
                             <div class="table-responsive">
                                 <table class="table result-table table-bordered">
@@ -758,7 +757,7 @@ try {
                                             <th>Week</th>
                                             <th>Date</th>
                                             <th>Attendance</th>
-                                            <th>Mission 20</th>
+                                            <th>' . $columnLabel . '</th>
                                             <th>Homework</th>
                                             <th>Total Score</th>
                                             <th>Rank</th>
@@ -976,11 +975,10 @@ try {
                     <div class="col-md-8">
                         <div class="input-group">
                             <input type="text" name="exam_id" class="form-control" placeholder="Enter Exam ID (e.g., MAX11SAM123)" required>
-
                         </div>
-                            <button type="submit" name="submit" class="btn-submit mt-3 w-100">
-                                <i class="fas fa-arrow-right me-2"></i> View Results
-                            </button>
+                        <button type="submit" name="submit" class="btn-submit mt-3 w-100">
+                            <i class="fas fa-arrow-right me-2"></i> View Results
+                        </button>
                         <div class="text-center mt-3">
                             <small class="text-muted">Don't have an Exam ID? <a style="color:#f57c00;">Contact your Class Coordinator</a></small>
                         </div>
@@ -1131,7 +1129,7 @@ try {
             labels: <?php echo json_encode($weeksForChart); ?>,
             datasets: [
                 {
-                    label: 'Mission 20 Score',
+                    label: '<?php echo $columnLabel; ?> Score',
                     data: mission20Data,
                     backgroundColor: 'rgba(245, 124, 0, 0.7)',
                     borderRadius: 8
@@ -1149,7 +1147,7 @@ try {
             maintainAspectRatio: true,
             plugins: {
                 legend: { position: 'top' },
-                title: { display: true, text: 'Mission 20 vs Homework Comparison' }
+                title: { display: true, text: '<?php echo $columnLabel; ?> vs Homework Comparison' }
             },
             scales: {
                 y: { beginAtZero: true, title: { display: true, text: 'Score' } }

@@ -13,68 +13,50 @@ if (isset($_GET['delete_week']) && isset($_GET['week_number']) && isset($_GET['w
     $grade = $_GET['grade'] ?? '';
     $medium = $_GET['medium'] ?? '';
     
-    // Confirm deletion
     if (isset($_GET['confirm']) && $_GET['confirm'] == 'yes') {
         try {
             $pdo->beginTransaction();
             
-            // Delete weekly marks for this week
             $stmt = $pdo->prepare("DELETE FROM weekly_marks WHERE week_number = ? AND week_date = ?");
             $stmt->execute([$weekNumber, $weekDate]);
             $marksDeleted = $stmt->rowCount();
             
-            // Delete week metadata
             $stmt = $pdo->prepare("DELETE FROM weeks_metadata WHERE week_number = ? AND week_date = ?");
             $stmt->execute([$weekNumber, $weekDate]);
             
-            // Optional: Delete students who have no marks (cleanup)
-            $stmt = $pdo->prepare("
-                DELETE FROM students 
-                WHERE exam_id NOT IN (SELECT DISTINCT exam_id FROM weekly_marks)
-                AND exam_id NOT IN (SELECT DISTINCT exam_id FROM students) -- keep if no marks
-            ");
-            // Actually, let's not auto-delete students - just marks
-            
             $pdo->commit();
-            
             $success = "Week {$weekNumber} ({$weekDate}) deleted successfully! {$marksDeleted} mark records removed.";
             
-            // Delete the uploaded CSV file if exists
             $csvFile = UPLOAD_DIR . "week_{$weekNumber}_{$grade}_{$medium}_*.csv";
             array_map('unlink', glob($csvFile));
-            
         } catch (Exception $e) {
             $pdo->rollBack();
             $error = "Failed to delete: " . $e->getMessage();
         }
     } else {
-        // Show confirmation message
         $error = "confirm_delete";
         $confirmWeek = ['week_number' => $weekNumber, 'week_date' => $weekDate, 'grade' => $grade, 'medium' => $medium];
     }
 }
 
-// CSV Template Generator
+// CSV Template Generator - Simplified
 if (isset($_GET['download_template'])) {
     $grade = $_GET['grade'] ?? 'Grade 11';
     $medium = $_GET['medium'] ?? 'Sinhala';
     $weekNumber = $_GET['week_number'] ?? '1';
     
-    // Set headers for CSV download
+    $isLowerGrade = in_array($grade, ['Grade 6', 'Grade 7', 'Grade 8', 'Grade 9']);
+    $columnName = $isLowerGrade ? 'Speed Test' : 'Mission 20';
+    
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="maxicon_template_week_' . $weekNumber . '_' . $grade . '_' . $medium . '.csv"');
     
-    // Create output stream
     $output = fopen('php://output', 'w');
-    
-    // Add UTF-8 BOM for proper Excel handling
     fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
     
-    // Template header row
-    $headers = ['No', 'Student Name', 'Attendance', 'Mission 20', 'Home-Work', 'Total', 'Rank'];
+    $headers = ['No', 'Student Name', 'Attendance', $columnName, 'Home-Work', 'Total', 'Rank'];
     fputcsv($output, $headers);
     
-    // Sample data rows
     $sampleData = [
         [1, 'Hesandu Nethmadu', 'Attended', '95', '56', '251', '1'],
         [2, 'Sathini Sahansa', 'Attended', '15', '39', '154', '15'],
@@ -88,24 +70,9 @@ if (isset($_GET['download_template'])) {
         [10, 'Kushal Kaveeja', 'Attended', '95', '55', '250', '2'],
     ];
     
-    // Add sample instructions as comments (using # at start of row)
-    fputcsv($output, ['# INSTRUCTIONS:']);
-    fputcsv($output, ['# 1. Do not change the column headers']);
-    fputcsv($output, ['# 2. For Attendance: Use "Attended" or "Absent"']);
-    fputcsv($output, ['# 3. For marks: Enter numbers only (0-100 for Mission20, 0-100 for Homework)']);
-    fputcsv($output, ['# 4. Total will be calculated automatically (100 + Mission20 + Homework)']);
-    fputcsv($output, ['# 5. Leave empty for absent students or missing marks']);
-    fputcsv($output, ['# 6. Rank can be left empty - system will auto-calculate']);
-    fputcsv($output, ['']);
-    
     foreach ($sampleData as $row) {
         fputcsv($output, $row);
     }
-    
-    // Add empty rows for more students
-    fputcsv($output, ['']);
-    fputcsv($output, ['# Add more students below (copy the format)']);
-    fputcsv($output, ['', 'Another Student Name', 'Attended', '0', '0', '', '']);
     
     fclose($output);
     exit();
@@ -124,40 +91,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $file = $_FILES['csv_file'];
         
-        // Check if week already exists
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM weeks_metadata WHERE week_number = ? AND grade = ? AND medium = ?");
         $stmt->execute([$weekNumber, $grade, $medium]);
         $weekExists = $stmt->fetchColumn();
         
         if ($weekExists > 0) {
-            $error = "Week {$weekNumber} for {$grade} {$medium} already exists! Please delete the existing week first or use a different week number.";
+            $error = "Week {$weekNumber} for {$grade} {$medium} already exists! Please delete the existing week first.";
         } else {
-            // Parse CSV
             $handle = fopen($file['tmp_name'], 'r');
             $data = [];
-            
-            // Skip rows until we find the header
             $foundHeader = false;
-            $headerRow = [];
+            
+            $isLowerGrade = in_array($grade, ['Grade 6', 'Grade 7', 'Grade 8', 'Grade 9']);
+            $columnName = $isLowerGrade ? 'Speed Test' : 'Mission 20';
             
             while (($row = fgetcsv($handle)) !== false) {
-                // Skip empty rows
                 if (empty(array_filter($row))) continue;
-                
-                // Skip comment rows (starting with #)
                 if (strpos(trim($row[0] ?? ''), '#') === 0) continue;
                 
                 if (!$foundHeader) {
-                    // Check if this looks like a header row
-                    if (stripos($row[0] ?? '', 'no') !== false || 
-                        stripos($row[1] ?? '', 'student name') !== false ||
-                        stripos($row[2] ?? '', 'attendance') !== false) {
+                    $rowString = implode(' ', $row);
+                    if (stripos($rowString, 'student name') !== false || 
+                        stripos($rowString, 'attendance') !== false ||
+                        stripos($rowString, $columnName) !== false ||
+                        stripos($rowString, 'homework') !== false) {
                         $foundHeader = true;
-                        $headerRow = $row;
                         continue;
                     }
                 } else {
-                    // This is a data row
                     if (!empty($row[1]) && $row[1] !== 'Student Name' && trim($row[1]) != '') {
                         $data[] = $row;
                     }
@@ -168,7 +129,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (empty($data)) {
                 $error = 'No valid student data found in CSV. Please use the template format.';
             } else {
-                // Process each student
                 $inserted = 0;
                 $updated = 0;
                 
@@ -182,12 +142,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     if (empty($name)) continue;
                     
-                    // If total is empty, calculate it
                     if ($total == 0 && $attendance == 'Attended') {
                         $total = 100 + $mission20 + $homework;
                     }
                     
-                    // Check if student exists, if not create with exam_id
                     $stmt = $pdo->prepare("SELECT exam_id FROM students WHERE student_name = ? AND grade = ? AND medium = ?");
                     $stmt->execute([$name, $grade, $medium]);
                     $existing = $stmt->fetch();
@@ -195,13 +153,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($existing) {
                         $examId = $existing['exam_id'];
                     } else {
-                        // Create new student with unique exam_id
                         $examId = generateExamID($name, $grade);
                         $stmt = $pdo->prepare("INSERT INTO students (exam_id, student_name, grade, medium) VALUES (?, ?, ?, ?)");
                         $stmt->execute([$examId, $name, $grade, $medium]);
                     }
                     
-                    // Insert weekly marks
                     $stmt = $pdo->prepare("
                         INSERT INTO weekly_marks (exam_id, week_date, week_number, attendance, mission_20, homework, total_score, rank_position)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -222,7 +178,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     else $updated++;
                 }
                 
-                // Update ranks for this week
                 $stmt = $pdo->prepare("
                     UPDATE weekly_marks w1
                     JOIN (
@@ -237,7 +192,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ");
                 $stmt->execute([$weekNumber, $weekDate, $weekNumber, $weekDate]);
                 
-                // Add week metadata
                 $stmt = $pdo->prepare("
                     INSERT INTO weeks_metadata (week_number, week_date, grade, medium)
                     VALUES (?, ?, ?, ?)
@@ -246,7 +200,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $success = "Uploaded successfully! {$inserted} records added. Ranks have been auto-calculated.";
                 
-                // Move uploaded file
                 $newFileName = "week_{$weekNumber}_{$grade}_{$medium}_" . date('Ymd_His') . ".csv";
                 move_uploaded_file($file['tmp_name'], UPLOAD_DIR . $newFileName);
             }
@@ -254,10 +207,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Get existing weeks for display
 $weeks = $pdo->query("SELECT * FROM weeks_metadata ORDER BY week_date DESC")->fetchAll();
 
-// Get summary statistics for each week
 foreach ($weeks as &$week) {
     $stmt = $pdo->prepare("SELECT COUNT(*) as student_count, AVG(total_score) as avg_score FROM weekly_marks WHERE week_number = ? AND week_date = ?");
     $stmt->execute([$week['week_number'], $week['week_date']]);
@@ -366,18 +317,6 @@ foreach ($weeks as &$week) {
             margin-bottom: 20px;
             border: 1px solid rgba(245,124,0,0.2);
         }
-        .week-card {
-            background: white;
-            border-radius: 16px;
-            padding: 15px;
-            margin-bottom: 12px;
-            transition: all 0.3s;
-            border: 1px solid #e0e0e0;
-        }
-        .week-card:hover {
-            border-color: #f57c00;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
         .delete-confirm {
             background: #fff3cd;
             border-left: 4px solid #ffc107;
@@ -440,19 +379,18 @@ foreach ($weeks as &$week) {
                 <div class="card border-0 shadow-sm rounded-4 p-4">
                     <h4 class="mb-3"><i class="fas fa-cloud-upload-alt me-2" style="color:#f57c00;"></i> Upload New Week</h4>
                     
-                    <!-- Template Download Section -->
                     <div class="template-card mb-4">
                         <h5><i class="fas fa-download me-2" style="color:#f57c00;"></i> Download Template</h5>
-                        <p class="text-muted small">Don't have a CSV file? Download our template with sample data.</p>
+                        <p class="text-muted small">Download a clean CSV template with sample data.</p>
                         <div class="row g-2">
                             <div class="col-md-5">
-                                <select id="template_grade" class="form-control form-control-sm" style="border-radius: 60px;">
-                                    <option value="Grade 6">Grade 6</option>
-                                    <option value="Grade 7">Grade 7</option>
-                                    <option value="Grade 8">Grade 8</option>
-                                    <option value="Grade 9">Grade 9</option>
-                                    <option value="Grade 10">Grade 10</option>
-                                    <option value="Grade 11" selected>Grade 11</option>
+                                <select id="template_grade" class="form-control form-control-sm" style="border-radius: 60px;" onchange="updateTemplateColumnHint()">
+                                    <option value="Grade 6">Grade 6 (Speed Test)</option>
+                                    <option value="Grade 7">Grade 7 (Speed Test)</option>
+                                    <option value="Grade 8">Grade 8 (Speed Test)</option>
+                                    <option value="Grade 9">Grade 9 (Speed Test)</option>
+                                    <option value="Grade 10">Grade 10 (Mission 20)</option>
+                                    <option value="Grade 11" selected>Grade 11 (Mission 20)</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
@@ -475,7 +413,7 @@ foreach ($weeks as &$week) {
                     <form method="POST" enctype="multipart/form-data">
                         <div class="mb-3">
                             <label class="form-label">Grade *</label>
-                            <select name="grade" class="form-control" style="border-radius: 60px; padding: 12px 20px;" required>
+                            <select name="grade" class="form-control" style="border-radius: 60px; padding: 12px 20px;" required onchange="updateGradeHint(this.value)">
                                 <option value="">Select Grade</option>
                                 <option value="Grade 6">Grade 6</option>
                                 <option value="Grade 7">Grade 7</option>
@@ -484,6 +422,7 @@ foreach ($weeks as &$week) {
                                 <option value="Grade 10">Grade 10</option>
                                 <option value="Grade 11">Grade 11</option>
                             </select>
+                            <small id="gradeHint" class="text-muted">Select grade to see the required column format</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Medium *</label>
@@ -506,9 +445,9 @@ foreach ($weeks as &$week) {
                                 <i class="fas fa-file-csv fa-3x mb-2" style="color:#f57c00;"></i>
                                 <p>Drag & drop or click to upload</p>
                                 <input type="file" name="csv_file" accept=".csv" class="form-control" required style="border-radius: 60px;">
-                                <small class="text-muted">
+                                <small class="text-muted" id="csvFormatHint">
                                     <i class="fas fa-info-circle"></i> 
-                                    Format: No, Student Name, Attendance, Mission20, Homework, Total, Rank
+                                    Format: No, Student Name, Attendance, Column Name, Homework, Total, Rank
                                 </small>
                             </div>
                         </div>
@@ -556,7 +495,7 @@ foreach ($weeks as &$week) {
                                                     class="btn btn-danger-apex">
                                                 <i class="fas fa-trash me-1"></i> Delete
                                             </button>
-                                         </td>
+                                        </td>
                                     </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -570,24 +509,28 @@ foreach ($weeks as &$week) {
                     <?php endif; ?>
                 </div>
                 
-                <!-- CSV Format Guide -->
                 <div class="card border-0 shadow-sm rounded-4 p-4 mt-4">
                     <h4 class="mb-3"><i class="fas fa-info-circle me-2" style="color:#f57c00;"></i> CSV Format Guide</h4>
                     <div class="table-responsive">
                         <table class="table table-sm">
                             <thead>
-                                <tr><th>Column</th><th>Description</th><th>Example</th></tr>
+                                <tr><th>Column</th><th>Grades 6-9</th><th>Grades 10-11</th><th>Example</th></tr>
                             </thead>
                             <tbody>
-                                <tr><td>No</td><td>Serial number (optional)</td><td>1</td></tr>
-                                <tr><td>Student Name</td><td>Full name of student</td><td>Hesandu Nethmadu</td></tr>
-                                <tr><td>Attendance</td><td>"Attended" or "Absent"</td><td>Attended</td></tr>
-                                <tr><td>Mission 20</td><td>Score (0-100)</td><td>95</td></tr>
-                                <tr><td>Home-Work</td><td>Score (0-100)</td><td>56</td></tr>
-                                <tr><td>Total</td><td>Leave empty for auto-calculation</td><td></td></tr>
-                                <tr><td>Rank</td><td>Leave empty for auto-calculation</td><td></td></tr>
+                                <tr><td>No</td><td>Optional</td><td>Optional</td><td>1</td></tr>
+                                <tr><td>Student Name</td><td>Required</td><td>Required</td><td>Hesandu Nethmadu</td></tr>
+                                <tr><td>Attendance</td><td>"Attended" or "Absent"</td><td>"Attended" or "Absent"</td><td>Attended</td></tr>
+                                <tr><td><span id="guideColumnName">Mission 20</span></td><td><strong>Speed Test</strong></td><td><strong>Mission 20</strong></td><td>95</td></tr>
+                                <tr><td>Home-Work</td><td>Score (0-100)</td><td>Score (0-100)</td><td>56</td></tr>
+                                <tr><td>Total</td><td>Leave empty or provide</td><td>Leave empty or provide</td><td></td></tr>
+                                <tr><td>Rank</td><td>Leave empty or provide</td><td>Leave empty or provide</td><td></td></tr>
                             </tbody>
                         </table>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> 
+                            <strong>Grades 6-9:</strong> Use "Speed Test" column | 
+                            <strong>Grades 10-11:</strong> Use "Mission 20" column
+                        </small>
                     </div>
                 </div>
             </div>
@@ -617,6 +560,32 @@ foreach ($weeks as &$week) {
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    function updateTemplateColumnHint() {
+        var grade = document.getElementById('template_grade').value;
+        var hint = document.getElementById('templateHint');
+        var guideColumn = document.getElementById('guideColumnName');
+        var isLowerGrade = ['Grade 6', 'Grade 7', 'Grade 8', 'Grade 9'].includes(grade);
+        var columnName = isLowerGrade ? 'Speed Test' : 'Mission 20';
+        hint.innerHTML = '<i class="fas fa-info-circle"></i> Template for ' + grade + ': Column "' + columnName + '"';
+        guideColumn.textContent = columnName;
+    }
+    
+    function updateGradeHint(grade) {
+        var hint = document.getElementById('gradeHint');
+        var guideColumn = document.getElementById('guideColumnName');
+        var csvHint = document.getElementById('csvFormatHint');
+        var isLowerGrade = ['Grade 6', 'Grade 7', 'Grade 8', 'Grade 9'].includes(grade);
+        var columnName = isLowerGrade ? 'Speed Test' : 'Mission 20';
+        
+        if (grade) {
+            hint.innerHTML = '<i class="fas fa-check-circle" style="color:#4caf50;"></i> For ' + grade + ', use column: <strong>"' + columnName + '"</strong>';
+            guideColumn.textContent = columnName;
+            csvHint.innerHTML = '<i class="fas fa-info-circle"></i> Format: No, Student Name, Attendance, <strong>' + columnName + '</strong>, Homework, Total, Rank';
+        } else {
+            hint.innerHTML = 'Select grade to see the required column format';
+        }
+    }
+    
     function downloadTemplate() {
         var grade = document.getElementById('template_grade').value;
         var medium = document.getElementById('template_medium').value;
@@ -633,7 +602,6 @@ foreach ($weeks as &$week) {
         deleteModal.show();
     }
     
-    // Auto-hide alerts after 5 seconds
     setTimeout(function() {
         var alerts = document.querySelectorAll('.alert');
         alerts.forEach(function(alert) {
@@ -641,6 +609,14 @@ foreach ($weeks as &$week) {
             bsAlert.close();
         });
     }, 5000);
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        updateTemplateColumnHint();
+        var gradeSelect = document.querySelector('select[name="grade"]');
+        if (gradeSelect.value) {
+            updateGradeHint(gradeSelect.value);
+        }
+    });
 </script>
 </body>
 </html>
