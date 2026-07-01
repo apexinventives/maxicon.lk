@@ -269,12 +269,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $weeks = $pdo->query("SELECT * FROM weeks_metadata ORDER BY week_date DESC")->fetchAll();
 
-foreach ($weeks as &$week) {
+foreach ($weeks as $index => $week) {
     $stmt = $pdo->prepare("SELECT COUNT(*) as student_count, AVG(total_score) as avg_score FROM weekly_marks WHERE week_number = ? AND week_date = ?");
     $stmt->execute([$week['week_number'], $week['week_date']]);
     $stats = $stmt->fetch();
-    $week['student_count'] = $stats['student_count'];
-    $week['avg_score'] = round($stats['avg_score'], 1);
+    $weeks[$index]['student_count'] = $stats['student_count'];
+    $weeks[$index]['avg_score'] = round($stats['avg_score'], 1);
 }
 ?>
 <!DOCTYPE html>
