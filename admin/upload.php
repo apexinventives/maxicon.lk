@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $weekExists = $stmt->fetchColumn();
         
         if ($weekExists > 0) {
-            $error = "Week {$weekNumber} for {$grade} {$medium} already exists! Please delete the existing week first.";
+            $error = "Week {$weekNumber} for {$grade} {$medium} already exists! Please delete the existing week first or use a different week number.";
         } else {
             $handle = fopen($file['tmp_name'], 'r');
             $data = [];
@@ -131,77 +131,137 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 $inserted = 0;
                 $updated = 0;
+                $skipped = 0;
+                $errors = [];
                 
-                foreach ($data as $row) {
-                    $name = trim($row[1] ?? '');
-                    $attendance = trim($row[2] ?? '');
-                    $mission20 = floatval($row[3] ?? 0);
-                    $homework = floatval($row[4] ?? 0);
-                    $total = floatval($row[5] ?? 0);
-                    $rank = isset($row[6]) ? intval($row[6]) : null;
-                    
-                    if (empty($name)) continue;
-                    
-                    if ($total == 0 && $attendance == 'Attended') {
-                        $total = 100 + $mission20 + $homework;
+                $pdo->beginTransaction();
+                
+                try {
+                    foreach ($data as $row) {
+                        $name = trim($row[1] ?? '');
+                        $attendanceRaw = trim($row[2] ?? '');
+                        
+                        // ============================================================
+                        // FIX: Normalize attendance value - handles case insensitivity
+                        // ============================================================
+                        $attendance = 'Absent'; // Default
+                        
+                        // Check for various forms of "Attended"
+                        if (in_array(strtolower($attendanceRaw), ['attended', 'present', 'yes', 'y', '1', 'true'])) {
+                            $attendance = 'Attended';
+                        } 
+                        // Check for various forms of "Absent"
+                        elseif (in_array(strtolower($attendanceRaw), ['absent', 'no', 'n', '0', 'false', ''])) {
+                            $attendance = 'Absent';
+                        }
+                        // If it's something else, check if it contains 'attend' or 'present' (case insensitive)
+                        elseif (stripos($attendanceRaw, 'attend') !== false || stripos($attendanceRaw, 'present') !== false) {
+                            $attendance = 'Attended';
+                        }
+                        elseif (stripos($attendanceRaw, 'absent') !== false) {
+                            $attendance = 'Absent';
+                        }
+                        // If empty, default to Absent
+                        elseif (empty($attendanceRaw)) {
+                            $attendance = 'Absent';
+                        }
+                        
+                        $mission20 = floatval($row[3] ?? 0);
+                        $homework = floatval($row[4] ?? 0);
+                        $total = floatval($row[5] ?? 0);
+                        $rank = isset($row[6]) ? intval($row[6]) : null;
+                        
+                        if (empty($name)) {
+                            $skipped++;
+                            continue;
+                        }
+                        
+                        // Check if student exists by name + grade + medium
+                        $stmt = $pdo->prepare("SELECT exam_id FROM students WHERE student_name = ? AND grade = ? AND medium = ?");
+                        $stmt->execute([$name, $grade, $medium]);
+                        $existing = $stmt->fetch();
+                        
+                        if ($existing) {
+                            $examId = $existing['exam_id'];
+                        } else {
+                            $examId = generateExamID($name, $grade);
+                            $stmt = $pdo->prepare("INSERT INTO students (exam_id, student_name, grade, medium) VALUES (?, ?, ?, ?)");
+                            $stmt->execute([$examId, $name, $grade, $medium]);
+                        }
+                        
+                        if ($total == 0 && $attendance == 'Attended') {
+                            $total = 100 + $mission20 + $homework;
+                        }
+                        
+                        $stmt = $pdo->prepare("
+                            INSERT INTO weekly_marks 
+                            (exam_id, week_date, week_number, attendance, mission_20, homework, total_score, rank_position)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                            ON DUPLICATE KEY UPDATE
+                            attendance = VALUES(attendance),
+                            mission_20 = VALUES(mission_20),
+                            homework = VALUES(homework),
+                            total_score = VALUES(total_score),
+                            rank_position = VALUES(rank_position)
+                        ");
+                        
+                        $stmt->execute([
+                            $examId,
+                            $weekDate,
+                            $weekNumber,
+                            $attendance,
+                            $mission20,
+                            $homework,
+                            $total,
+                            $rank
+                        ]);
+                        
+                        if ($stmt->rowCount() == 1) {
+                            $inserted++;
+                        } elseif ($stmt->rowCount() == 2) {
+                            $updated++;
+                        }
                     }
                     
-                    $stmt = $pdo->prepare("SELECT exam_id FROM students WHERE student_name = ? AND grade = ? AND medium = ?");
-                    $stmt->execute([$name, $grade, $medium]);
-                    $existing = $stmt->fetch();
-                    
-                    if ($existing) {
-                        $examId = $existing['exam_id'];
-                    } else {
-                        $examId = generateExamID($name, $grade);
-                        $stmt = $pdo->prepare("INSERT INTO students (exam_id, student_name, grade, medium) VALUES (?, ?, ?, ?)");
-                        $stmt->execute([$examId, $name, $grade, $medium]);
-                    }
+                    // Update ranks for this week
+                    $stmt = $pdo->prepare("
+                        UPDATE weekly_marks w1
+                        JOIN (
+                            SELECT exam_id, total_score,
+                                @rank := @rank + 1 as new_rank
+                            FROM weekly_marks, (SELECT @rank := 0) r
+                            WHERE week_number = ? AND week_date = ?
+                            ORDER BY total_score DESC, mission_20 DESC
+                        ) w2 ON w1.exam_id = w2.exam_id
+                        SET w1.rank_position = w2.new_rank
+                        WHERE w1.week_number = ? AND w1.week_date = ?
+                    ");
+                    $stmt->execute([$weekNumber, $weekDate, $weekNumber, $weekDate]);
                     
                     $stmt = $pdo->prepare("
-                        INSERT INTO weekly_marks (exam_id, week_date, week_number, attendance, mission_20, homework, total_score, rank_position)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                        INSERT INTO weeks_metadata (week_number, week_date, grade, medium)
+                        VALUES (?, ?, ?, ?)
                     ");
+                    $stmt->execute([$weekNumber, $weekDate, $grade, $medium]);
                     
-                    $stmt->execute([
-                        $examId,
-                        $weekDate,
-                        $weekNumber,
-                        $attendance === 'Attended' ? 'Attended' : 'Absent',
-                        $mission20,
-                        $homework,
-                        $total,
-                        $rank
-                    ]);
+                    $pdo->commit();
                     
-                    if ($stmt->rowCount() > 0) $inserted++;
-                    else $updated++;
+                    $success = "Upload completed successfully!";
+                    $success .= " {$inserted} new records added.";
+                    if ($updated > 0) {
+                        $success .= " {$updated} existing records updated.";
+                    }
+                    if ($skipped > 0) {
+                        $success .= " {$skipped} records skipped (empty names).";
+                    }
+                    
+                    $newFileName = "week_{$weekNumber}_{$grade}_{$medium}_" . date('Ymd_His') . ".csv";
+                    move_uploaded_file($file['tmp_name'], UPLOAD_DIR . $newFileName);
+                    
+                } catch (Exception $e) {
+                    $pdo->rollBack();
+                    $error = "Upload failed: " . $e->getMessage();
                 }
-                
-                $stmt = $pdo->prepare("
-                    UPDATE weekly_marks w1
-                    JOIN (
-                        SELECT exam_id, total_score,
-                            @rank := @rank + 1 as new_rank
-                        FROM weekly_marks, (SELECT @rank := 0) r
-                        WHERE week_number = ? AND week_date = ?
-                        ORDER BY total_score DESC, mission_20 DESC
-                    ) w2 ON w1.exam_id = w2.exam_id
-                    SET w1.rank_position = w2.new_rank
-                    WHERE w1.week_number = ? AND w1.week_date = ?
-                ");
-                $stmt->execute([$weekNumber, $weekDate, $weekNumber, $weekDate]);
-                
-                $stmt = $pdo->prepare("
-                    INSERT INTO weeks_metadata (week_number, week_date, grade, medium)
-                    VALUES (?, ?, ?, ?)
-                ");
-                $stmt->execute([$weekNumber, $weekDate, $grade, $medium]);
-                
-                $success = "Uploaded successfully! {$inserted} records added. Ranks have been auto-calculated.";
-                
-                $newFileName = "week_{$weekNumber}_{$grade}_{$medium}_" . date('Ymd_His') . ".csv";
-                move_uploaded_file($file['tmp_name'], UPLOAD_DIR . $newFileName);
             }
         }
     }
