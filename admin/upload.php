@@ -17,15 +17,22 @@ if (isset($_GET['delete_week']) && isset($_GET['week_number']) && isset($_GET['w
         try {
             $pdo->beginTransaction();
             
-            $stmt = $pdo->prepare("DELETE FROM weekly_marks WHERE week_number = ? AND week_date = ?");
-            $stmt->execute([$weekNumber, $weekDate]);
+            $stmt = $pdo->prepare(
+                "DELETE FROM weekly_marks 
+                 WHERE week_number = ? AND week_date = ?
+                 AND exam_id IN (
+                     SELECT exam_id FROM students
+                     WHERE grade = ? AND medium = ?
+                 )"
+            );
+            $stmt->execute([$weekNumber, $weekDate, $grade, $medium]);
             $marksDeleted = $stmt->rowCount();
             
-            $stmt = $pdo->prepare("DELETE FROM weeks_metadata WHERE week_number = ? AND week_date = ?");
-            $stmt->execute([$weekNumber, $weekDate]);
+            $stmt = $pdo->prepare("DELETE FROM weeks_metadata WHERE week_number = ? AND week_date = ? AND grade = ? AND medium = ?");
+            $stmt->execute([$weekNumber, $weekDate, $grade, $medium]);
             
             $pdo->commit();
-            $success = "Week {$weekNumber} ({$weekDate}) deleted successfully! {$marksDeleted} mark records removed.";
+            $success = "Week {$weekNumber} ({$weekDate}) deleted successfully for {$grade} {$medium}! {$marksDeleted} mark records removed.";
             
             $csvFile = UPLOAD_DIR . "week_{$weekNumber}_{$grade}_{$medium}_*.csv";
             array_map('unlink', glob($csvFile));
