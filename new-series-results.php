@@ -755,7 +755,6 @@ try {
                                         <tr>
                                             <th>#</th>
                                             <th>Week</th>
-                                            <th>Date</th>
                                             <th>Attendance</th>
                                             <th>' . $columnLabel . '</th>
                                             <th>Homework</th>
@@ -804,7 +803,6 @@ try {
                                 <tr>
                                     <td>' . $count . '</td>
                                     <td><strong>Week ' . $mark['week_number'] . '</strong></td>
-                                    <td>' . date('d M Y', strtotime($mark['week_date'])) . '</td>
                                     <td>' . ($mark['attendance'] == 'Attended' ? '<span class="badge bg-success"><i class="fas fa-check-circle"></i> Attended</span>' : '<span class="badge bg-danger"><i class="fas fa-times-circle"></i> Absent</span>') . '</td>
                                     <td>' . ($mark['mission_20'] ?: '-') . '</td>
                                     <td>' . ($mark['homework'] ?: '-') . '</td>
