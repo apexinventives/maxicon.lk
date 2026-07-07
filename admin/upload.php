@@ -148,9 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $name = trim($row[1] ?? '');
                         $attendanceRaw = trim($row[2] ?? '');
                         
-                        // ============================================================
-                        // FIX: Normalize attendance value - handles case insensitivity
-                        // ============================================================
+                        // Normalize attendance value - handles case insensitivity
                         $attendance = 'Absent'; // Default
                         
                         // Check for various forms of "Attended"
@@ -175,31 +173,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         $mission20 = floatval($row[3] ?? 0);
                         $homework = floatval($row[4] ?? 0);
-                        $total = floatval($row[5] ?? 0);
-                        $rank = isset($row[6]) ? intval($row[6]) : null;
+                        
+                        // ============================================================
+                        // FIX: Preserve Total and Rank from CSV if provided
+                        // ============================================================
+                        $total = isset($row[5]) && trim($row[5]) !== '' ? floatval($row[5]) : null;
+                        $rank = isset($row[6]) && trim($row[6]) !== '' ? intval($row[6]) : null;
+                        
+                        // Only calculate Total if it wasn't provided in CSV
+                        if ($total === null) {
+                            // Calculate total only if attendance is 'Attended'
+                            if ($attendance === 'Attended') {
+                                $total = 100 + $mission20 + $homework;
+                            } else {
+                                $total = 0;
+                            }
+                        }
                         
                         if (empty($name)) {
                             $skipped++;
                             continue;
                         }
                         
-                        // Check if student exists by name + grade + medium
-                        $stmt = $pdo->prepare("SELECT exam_id FROM students WHERE student_name = ? AND grade = ? AND medium = ?");
-                        $stmt->execute([$name, $grade, $medium]);
+                        // Better student lookup - Check by name across all grades
+                        $examId = null;
+                        
+                        // First, try to find student by exact name (case insensitive)
+                        $stmt = $pdo->prepare("SELECT exam_id, grade, medium FROM students WHERE LOWER(student_name) = LOWER(?)");
+                        $stmt->execute([$name]);
                         $existing = $stmt->fetch();
                         
                         if ($existing) {
+                            // Student exists - use existing exam_id
                             $examId = $existing['exam_id'];
+                            
+                            // Check if grade/medium changed and update if needed
+                            if ($existing['grade'] !== $grade || $existing['medium'] !== $medium) {
+                                $stmt = $pdo->prepare("UPDATE students SET grade = ?, medium = ? WHERE exam_id = ?");
+                                $stmt->execute([$grade, $medium, $examId]);
+                                
+                                error_log("Student {$name} moved from {$existing['grade']} {$existing['medium']} to {$grade} {$medium}");
+                            }
                         } else {
-                            $examId = generateExamID($name, $grade);
-                            $stmt = $pdo->prepare("INSERT INTO students (exam_id, student_name, grade, medium) VALUES (?, ?, ?, ?)");
-                            $stmt->execute([$examId, $name, $grade, $medium]);
+                            // Try to find similar names (handle typos)
+                            $stmt = $pdo->prepare("SELECT exam_id, student_name FROM students WHERE SOUNDEX(student_name) = SOUNDEX(?)");
+                            $stmt->execute([$name]);
+                            $similar = $stmt->fetch();
+                            
+                            if ($similar) {
+                                // Found a similar name - update the name to match exactly
+                                $examId = $similar['exam_id'];
+                                $stmt = $pdo->prepare("UPDATE students SET student_name = ? WHERE exam_id = ?");
+                                $stmt->execute([$name, $examId]);
+                                error_log("Similar name found: '{$similar['student_name']}' updated to '{$name}'");
+                            } else {
+                                // No student found - create new
+                                $examId = generateExamID($name, $grade);
+                                $stmt = $pdo->prepare("INSERT INTO students (exam_id, student_name, grade, medium) VALUES (?, ?, ?, ?)");
+                                $stmt->execute([$examId, $name, $grade, $medium]);
+                            }
                         }
                         
-                        if ($total == 0 && $attendance == 'Attended') {
-                            $total = 100 + $mission20 + $homework;
-                        }
-                        
+                        // ============================================================
+                        // FIX: Preserve existing rank and total on update
+                        // ============================================================
                         $stmt = $pdo->prepare("
                             INSERT INTO weekly_marks 
                             (exam_id, week_date, week_number, attendance, mission_20, homework, total_score, rank_position)
@@ -208,8 +245,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             attendance = VALUES(attendance),
                             mission_20 = VALUES(mission_20),
                             homework = VALUES(homework),
-                            total_score = VALUES(total_score),
-                            rank_position = VALUES(rank_position)
+                            total_score = IF(VALUES(total_score) IS NOT NULL, VALUES(total_score), total_score),
+                            rank_position = IF(VALUES(rank_position) IS NOT NULL, VALUES(rank_position), rank_position)
                         ");
                         
                         $stmt->execute([
@@ -230,20 +267,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                     }
                     
-                    // Update ranks for this week
+                    // ============================================================
+                    // FIX: Only recalculate ranks if Rank column was NOT provided
+                    // ============================================================
+                    // Check if any records in this week have NULL or missing rank
                     $stmt = $pdo->prepare("
-                        UPDATE weekly_marks w1
-                        JOIN (
-                            SELECT exam_id, total_score,
-                                @rank := @rank + 1 as new_rank
-                            FROM weekly_marks, (SELECT @rank := 0) r
-                            WHERE week_number = ? AND week_date = ?
-                            ORDER BY total_score DESC, mission_20 DESC
-                        ) w2 ON w1.exam_id = w2.exam_id
-                        SET w1.rank_position = w2.new_rank
-                        WHERE w1.week_number = ? AND w1.week_date = ?
+                        SELECT COUNT(*) as missing_rank 
+                        FROM weekly_marks 
+                        WHERE week_number = ? AND week_date = ? AND (rank_position IS NULL OR rank_position = 0)
                     ");
-                    $stmt->execute([$weekNumber, $weekDate, $weekNumber, $weekDate]);
+                    $stmt->execute([$weekNumber, $weekDate]);
+                    $missingRankCount = $stmt->fetchColumn();
+                    
+                    // Only recalculate if there are missing ranks
+                    if ($missingRankCount > 0) {
+                        $stmt = $pdo->prepare("
+                            UPDATE weekly_marks w1
+                            JOIN (
+                                SELECT exam_id, total_score,
+                                    @rank := @rank + 1 as new_rank
+                                FROM weekly_marks, (SELECT @rank := 0) r
+                                WHERE week_number = ? AND week_date = ?
+                                ORDER BY total_score DESC, mission_20 DESC
+                            ) w2 ON w1.exam_id = w2.exam_id
+                            SET w1.rank_position = w2.new_rank
+                            WHERE w1.week_number = ? AND w1.week_date = ?
+                            AND w1.rank_position IS NULL
+                        ");
+                        $stmt->execute([$weekNumber, $weekDate, $weekNumber, $weekDate]);
+                    }
                     
                     $stmt = $pdo->prepare("
                         INSERT INTO weeks_metadata (week_number, week_date, grade, medium)
@@ -391,6 +443,14 @@ foreach ($weeks as $index => $week) {
             border-radius: 12px;
             margin-bottom: 20px;
         }
+        .badge-duplicate {
+            background: #ff6b6b;
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
@@ -404,6 +464,7 @@ foreach ($weeks as $index => $week) {
             <a class="nav-link active" href="upload.php"><i class="fas fa-upload"></i> Upload Exam</a>
             <a class="nav-link" href="manage_students.php"><i class="fas fa-users"></i> Manage Students</a>
             <a class="nav-link" href="edit_marks.php"><i class="fas fa-edit"></i> Edit Marks</a>
+            <a class="nav-link" href="duplicate_check.php"><i class="fas fa-copy"></i> Duplicate Check</a>
             <a class="nav-link" href="logout.php"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </nav>
     </div>
@@ -411,6 +472,11 @@ foreach ($weeks as $index => $week) {
     <div class="main-content">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="mb-0"><i class="fas fa-upload me-2"></i> Upload Weekly Exam</h2>
+            <div>
+                <a href="duplicate_check.php" class="btn btn-outline-apex">
+                    <i class="fas fa-copy me-2"></i> Check Duplicates
+                </a>
+            </div>
         </div>
         
         <?php if ($success): ?>
@@ -599,6 +665,11 @@ foreach ($weeks as $index => $week) {
                             <strong>Grades 10-11:</strong> Use "Mission 20" column
                         </small>
                     </div>
+                    
+                    <div class="alert alert-warning mt-3">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Important:</strong> The system now preserves existing Rank and Total values from your CSV file. Only if Rank or Total are empty will they be calculated automatically.
+                    </div>
                 </div>
             </div>
         </div>
@@ -620,6 +691,24 @@ foreach ($weeks as $index => $week) {
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <a href="#" id="confirmDeleteBtn" class="btn btn-danger">Yes, Delete Week</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Duplicate Students Modal -->
+<div class="modal fade" id="duplicateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4">
+            <div class="modal-header">
+                <h5 class="modal-title text-warning"><i class="fas fa-copy me-2"></i> Potential Duplicate Students</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="duplicateContent">
+                <p>Loading duplicates...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -667,6 +756,33 @@ foreach ($weeks as $index => $week) {
         
         var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
         deleteModal.show();
+    }
+    
+    function checkDuplicates() {
+        fetch('check_duplicates.php')
+            .then(response => response.json())
+            .then(data => {
+                var content = document.getElementById('duplicateContent');
+                if (data.length === 0) {
+                    content.innerHTML = '<div class="alert alert-success">No duplicate students found!</div>';
+                } else {
+                    var html = '<p>Found ' + data.length + ' potential duplicate student records:</p>';
+                    html += '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Exam ID</th><th>Name</th><th>Grade</th><th>Medium</th></tr></thead><tbody>';
+                    
+                    data.forEach(function(student) {
+                        html += '<tr><td>' + student.exam_id + '</td><td>' + student.student_name + '</td><td>' + student.grade + '</td><td>' + student.medium + '</td></tr>';
+                    });
+                    
+                    html += '</tbody></table></div>';
+                    html += '<p class="text-muted small">Go to <a href="manage_students.php">Manage Students</a> to merge or delete duplicates.</p>';
+                    content.innerHTML = html;
+                }
+                var duplicateModal = new bootstrap.Modal(document.getElementById('duplicateModal'));
+                duplicateModal.show();
+            })
+            .catch(error => {
+                document.getElementById('duplicateContent').innerHTML = '<div class="alert alert-danger">Failed to load duplicates: ' + error + '</div>';
+            });
     }
     
     setTimeout(function() {
